@@ -154,6 +154,58 @@ function SendStream (req, path, options) {
     ? Boolean(opts.nostore)
     : false
 
+  this._nocache = opts.nocache !== undefined
+    ? Boolean(opts.nocache)
+    : false
+
+  this._mustrevalidate = opts.mustrevalidate !== undefined
+    ? Boolean(opts.mustrevalidate)
+    : false
+
+  this._proxyrevalidate = opts.proxyrevalidate !== undefined
+    ? Boolean(opts.proxyrevalidate)
+    : false
+
+  this._private = opts.privatecheck !== undefined
+    ? Boolean(opts.privatecheck)
+    : false
+
+  this._public = opts.publiccheck !== undefined
+    ? Boolean(opts.publiccheck)
+    : true
+
+  this._mustunderstand = opts.mustunderstand !== undefined
+    ? Boolean(opts.mustunderstand)
+    : false
+
+  this._notransform = opts.notransform !== undefined
+    ? Boolean(opts.notransform)
+    : false
+
+  this._stalewhilerevalidate = opts.stalewhilerevalidate
+  this._stalewhilerevalidate = typeof this._stalewhilerevalidate === 'string'
+    ? ms(this._stalewhilerevalidate)
+    : Number(this._stalewhilerevalidate)
+  this._stalewhilerevalidate = !isNaN(this._stalewhilerevalidate)
+    ? Math.max(0, this._stalewhilerevalidate)
+    : 0
+
+  this._staleiferror = opts.staleiferror
+  this._staleiferror = typeof this._staleiferror === 'string'
+    ? ms(this._staleiferror)
+    : Number(this._staleiferror)
+  this._staleiferror = !isNaN(this._staleiferror)
+    ? Math.max(0, this._staleiferror)
+    : 0
+
+  this._smaxage = opts.smaxAge || opts.smaxage
+  this._smaxage = typeof this._smaxage === 'string'
+    ? ms(this._smaxage)
+    : Number(this._smaxage)
+  this._smaxage = !isNaN(this._smaxage)
+    ? Math.min(Math.max(0, this._smaxage), MAX_S_AGE)
+    : 0
+
   this._index = opts.index !== undefined
     ? normalizeList(opts.index, 'index option')
     : ['index.html']
@@ -263,7 +315,7 @@ SendStream.prototype.maxage = deprecate.function(function maxage (maxAge) {
     ? ms(maxAge)
     : Number(maxAge)
   this._maxage = !isNaN(this._maxage)
-    ? Math.min(Math.max(0, this._maxage), MAX_MAXAGE)
+    ? Math.max(0, this._maxage)
     : 0
   debug('max-age %d', this._maxage)
   return this
@@ -282,7 +334,7 @@ SendStream.prototype.maxstale = deprecate.function(function maxstale (maxStale) 
     ? ms(maxStale)
     : Number(maxStale)
   this._maxstale = !isNaN(this._maxstale)
-    ? Math.min(Math.max(0, this._maxstale), MAX_STALE)
+    ? Math.max(0, this._maxstale)
     : 0
   debug('max-stale %d', this._maxstale)
   return this
@@ -300,11 +352,31 @@ SendStream.prototype.smaxage = deprecate.function(function smaxage (sMaxage) {
     ? ms(sMaxage)
     : Number(sMaxage)
   this._smaxage = !isNaN(this._smaxage)
-    ? Math.min(Math.max(0, this._smaxage), MAX_S_AGE)
+    ? Math.max(0, this._smaxage)
     : 0
   debug('smaxage %d', this._smaxage)
   return this
 }, 'send.smaxage: pass sMaxage as option')
+
+/**
+ * Set stale-while-revalidate to `staleWhileRevalidate`.
+ *
+ * @param {boolean} staleWhileRevalidate
+ * @return {SendStream}
+ * @api public
+ */
+// When you use a cache-busting pattern for resources and apply them to a long max-age, you can also add immutable to avoid revalidation.
+SendStream.prototype.stalewhilerevalidate = deprecate.function(function stalewhilerevalidate (staleWhileRevalidate) {
+  this._stalewhilerevalidate = typeof staleWhileRevalidate === 'string'
+    ? ms(staleWhileRevalidate)
+    : Number(staleWhileRevalidate)
+  this._stalewhilerevalidate = !isNaN(this._stalewhilerevalidate)
+    ? Math.max(0, this._stalewhilerevalidate)
+    : 0
+  debug('staleWhileRevalidate %d', this._stalewhilerevalidate)
+  return this
+}, 'send.staleWhileRevalidate: pass staleWhileRevalidate as option')
+
 
 /**
  * Set no-cache to `nocache`.
@@ -331,8 +403,8 @@ SendStream.prototype.nocache = deprecate.function(function nocache (nocache = fa
  */
 // Typically, must-revalidate is used with max-age.
 SendStream.prototype.mustrevalidate = deprecate.function(function mustrevalidate (mustRevalidate = false) {
-  this._mustrevalidate = typeof mustrevalidate === 'boolean'
-    ? mustrevalidate
+  this._mustrevalidate = typeof mustRevalidate === 'boolean'
+    ? mustRevalidate
     : false
   debug('must-revalidate %d', this._mustrevalidate)
   return this
@@ -346,8 +418,8 @@ SendStream.prototype.mustrevalidate = deprecate.function(function mustrevalidate
  * @api public
  */
 SendStream.prototype.proxyrevalidate = deprecate.function(function proxyrevalidate (proxyRevalidate = false) {
-  this._proxyrevalidate = typeof proxyrevalidate === 'boolean'
-    ? proxyrevalidate
+  this._proxyrevalidate = typeof proxyRevalidate === 'boolean'
+    ? proxyRevalidate
     : false
   debug('must-proxyrevalidate %d', this._proxyrevalidate)
   return this
@@ -448,21 +520,6 @@ SendStream.prototype.immutable = deprecate.function(function immutable (immutabl
   return this
 }, 'send.immutable: pass immutable as option')
 
-/**
- * Set stale-while-revalidate to `staleWhileRevalidate`.
- *
- * @param {boolean} staleWhileRevalidate
- * @return {SendStream}
- * @api public
- */
-// When you use a cache-busting pattern for resources and apply them to a long max-age, you can also add immutable to avoid revalidation.
-SendStream.prototype.stalewhilerevalidate = deprecate.function(function immutable (staleWhileRevalidate = false) {
-  this._stalewhilerevalidate = typeof staleWhileRevalidate === 'boolean'
-    ? staleWhileRevalidate
-    : false
-  debug('stale-while-revalidate %d', this._stalewhilerevalidate)
-  return this
-}, 'send.staleWhileRevalidate: pass staleWhileRevalidate as option')
 
 /**
  * Set stale-if-error to `staleIfError`.
@@ -476,11 +533,11 @@ SendStream.prototype.staleiferror = deprecate.function(function staleiferror (st
     ? ms(staleIfError)
     : Number(staleIfError)
   this._staleiferror = !isNaN(this._staleiferror)
-    ? Math.min(Math.max(0, this._staleiferror), MAX_STALE_IF_ERROR)
+    ? Math.max(0, this._staleiferror)
     : 0
-  debug('smaxage %d', this._staleiferror)
+  debug('staleiferror %d', this._staleiferror)
   return this
-}, 'send.smaxage: pass sMaxage as option')
+}, 'send.staleiferror: pass staleiferror as option')
 
 /**
  * Emit error with `status`.
@@ -1086,16 +1143,47 @@ SendStream.prototype.setHeader = function setHeader (path, stat) {
   }
 
   if (this._cacheControl && !res.getHeader('Cache-Control')) {
-    var cacheControl = 'public, max-age=' + Math.floor(this._maxage / 1000)
+    var cacheControl = ''
+    if (this._private) {
+      cacheControl += 'private'
+    } else {
+      cacheControl += 'public'
+    }
 
+    cacheControl += ', max-age=' + Math.max(0, Math.floor(this._maxage / 1000))
+
+    if (this._smaxage !== undefined && this._smaxage > 0) {
+      cacheControl += ', s-maxage=' + Math.max(0, Math.floor(this._smaxage / 1000))
+    }
+
+    if (this._stalewhilerevalidate !== undefined && this._stalewhilerevalidate > 0) {
+      cacheControl += ', stale-while-revalidate=' + Math.max(0, Math.floor(this._stalewhilerevalidate / 1000))
+    }
+
+    if (this._staleiferror !== undefined && this._staleiferror > 0) {
+      cacheControl += ', stale-if-error=' + Math.max(0, Math.floor(this._staleiferror / 1000))
+    }
     if (this._immutable) {
       cacheControl += ', immutable'
     }
-
     if (this._nostore) {
       cacheControl += ', no-store'
     }
-
+    if (this._nocache) {
+      cacheControl += ', no-cache'
+    }
+    if (this._mustrevalidate) {
+      cacheControl += ', must-revalidate'
+    }
+    if (this._proxyrevalidate) {
+      cacheControl += ', proxy-revalidate'
+    }
+    if (this._mustunderstand) {
+      cacheControl += ', must-understand'
+    }
+    if (this._notransform) {
+      cacheControl += ', no-transform'
+    }
     debug('cache-control %s', cacheControl)
     res.setHeader('Cache-Control', cacheControl)
   }

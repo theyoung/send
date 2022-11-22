@@ -950,8 +950,112 @@ describe('send(file).pipe(res)', function () {
     })
   })
 
-  describe('.noStore()', function () {
+  describe('.smaxage()', function () {
+    it('should default to null', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .smaxage(undefined)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0', done)
+    })
+
+    it('should floor to integer', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .smaxage(2000)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, s-maxage=2', done)
+    })
+
+    it('should accept string', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .smaxage('2000')
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, s-maxage=2', done)
+    })
+  })
+
+  describe('.stale-while-revalidate()', function () {
+    it('should default to null', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .stalewhilerevalidate(undefined)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0', done)
+    })
+
+    it('should floor to integer', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .stalewhilerevalidate(2000)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, stale-while-revalidate=2', done)
+    })
+
+    it('should accept string', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .stalewhilerevalidate('2000')
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, stale-while-revalidate=2', done)
+    })
+  })
+
+  describe('.staleiferror()', function () {
     it('should default to 0', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .staleiferror(undefined)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0', done)
+    })
+
+    it('should floor to integer', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .staleiferror(1234)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, stale-if-error=1', done)
+    })
+  })
+
+
+
+  describe('.noStore()', function () {
+    it('should no-store', function (done) {
       var app = http.createServer(function (req, res) {
         send(req, 'test/fixtures/name.txt')
           .nostore(true)
@@ -962,7 +1066,115 @@ describe('send(file).pipe(res)', function () {
         .get('/name.txt')
         .expect('Cache-Control', 'public, max-age=0, no-store')
         .end((err, res) => {
-          console.log(res)
+          // console.log(res)
+          done.call(this, err)
+        })
+    })
+  })
+
+  describe('.noCache()', function () {
+    it('should no-cache', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .nocache(true)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, no-cache')
+        .end((err, res) => {
+          // console.log(res)
+          done.call(this, err)
+        })
+    })
+  })
+
+  describe('.mustrevalidate()', function () {
+    it('should must-revalidate', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .mustrevalidate(true)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, must-revalidate')
+        .end((err, res) => {
+          // console.log(res)
+          done.call(this, err)
+        })
+    })
+  })
+
+  describe('.proxyrevalidate()', function () {
+    it('should proxy-revalidate', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .proxyrevalidate(true)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, proxy-revalidate')
+        .end((err, res) => {
+          // console.log(res)
+          done.call(this, err)
+        })
+    })
+  })
+
+  describe('.privateFn()', function () {
+    it('should private', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .privateFn(true)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'private, max-age=0')
+        .end((err, res) => {
+          // console.log(res)
+          done.call(this, err)
+        })
+    })
+  })
+
+  describe('.mustunderstand()', function () {
+    it('should must-understand\n', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .mustunderstand(true)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, must-understand')
+        .end((err, res) => {
+          // console.log(res)
+          done.call(this, err)
+        })
+    })
+  })
+
+  describe('.notransform()', function () {
+    it('should no-transform', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .notransform(true)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, no-transform')
+        .end((err, res) => {
+          // console.log(res)
           done.call(this, err)
         })
     })

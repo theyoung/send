@@ -1,7 +1,7 @@
 {
   "name": "send-alter",
   "description": "Better streaming static file server with Range and conditional-GET support with Cache-Control",
-  "version": "0.18.1",
+  "version": "0.18.2",
   "author": "TJ Holowaychuk <tj@vision-media.ca>",
   "contributors": [
     "Douglas Christopher Wilson <doug@somethingdoug.com>",

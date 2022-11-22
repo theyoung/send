@@ -6,11 +6,76 @@ Please, remind it before applying the version.
 ```bash
 $ npm install send-alter
 ```
+Referenced by https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 
-##### no-store
+## case study
+In case of express, you can use it below code
+```
+app.use('/public', express.static(path.join(__dirname + '/public'),{privatecheck:true, nostore:true, maxAge: 0, stalewhilerevalidate:1000}));
+```
+Then, you may log a response og express with the DEBUG MODE. 
+`DEBUG=* node ./bin/www`
+
+```
+ send cache-control private, max-age=0, stale-while-revalidate=1, no-store +0ms
+```
+
+##### nostore
 
 Enable or disable the `no-store` directive in the `Cache-Control` response
 header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, no-store'
+
+##### smaxAge, smaxage
+
+Enable or disable the `s-maxage` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, s-maxage=2'
+
+##### smaxAge, smaxage
+
+Enable or disable the `s-maxage` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, s-maxage=2'
+
+
+##### nocache
+
+Enable or disable the `no-cache` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, no-cache'
+
+##### mustrevalidate
+
+Enable or disable the `must-revalidate` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, must-revalidate'
+
+##### proxyrevalidate
+
+Enable or disable the `proxy-revalidate` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, proxy-revalidate'
+
+##### privatecheck
+
+Enable or disable the `private` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'private, max-age=0'
+
+##### mustunderstand
+
+Enable or disable the `must-understand` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, must-understand'
+
+##### notransform
+
+Enable or disable the `no-transform` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, no-store'
+
+##### stalewhilerevalidate
+
+Enable or disable the `stale-while-revalidate` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, stale-while-revalidate=2'
+
+##### staleiferror
+
+Enable or disable the `stale-if-error` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, stale-if-error=1'
+
 
 # Below contents are original.
 
