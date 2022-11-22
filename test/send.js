@@ -28,8 +28,16 @@ describe('send(file).pipe(res)', function () {
   it('should stream the file contents', function (done) {
     request(app)
       .get('/name.txt')
-      .expect('Content-Length', '4')
-      .expect(200, 'tobi', done)
+    // .expect('Content-Length', '4')
+      .expect(200, 'tobi')
+    // .then(response => {
+    //   console.log(response)
+    //   // done.call(this, response)
+    // })
+      .end((err, res) => {
+        console.log(res)
+        done.call(this, err)
+      })
   })
 
   it('should stream a zero-length file', function (done) {
@@ -939,6 +947,24 @@ describe('send(file).pipe(res)', function () {
       request(app)
         .get('/name.txt')
         .expect('Cache-Control', 'public, max-age=31536000', done)
+    })
+  })
+
+  describe('.noStore()', function () {
+    it('should default to 0', function (done) {
+      var app = http.createServer(function (req, res) {
+        send(req, 'test/fixtures/name.txt')
+          .nostore(true)
+          .pipe(res)
+      })
+
+      request(app)
+        .get('/name.txt')
+        .expect('Cache-Control', 'public, max-age=0, no-store')
+        .end((err, res) => {
+          console.log(res)
+          done.call(this, err)
+        })
     })
   })
 

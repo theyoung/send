@@ -1,15 +1,16 @@
 {
-  "name": "send",
-  "description": "Better streaming static file server with Range and conditional-GET support",
-  "version": "0.18.0",
+  "name": "send-alter",
+  "description": "Better streaming static file server with Range and conditional-GET support with Cache-Control",
+  "version": "0.18.1",
   "author": "TJ Holowaychuk <tj@vision-media.ca>",
   "contributors": [
     "Douglas Christopher Wilson <doug@somethingdoug.com>",
     "James Wyatt Cready <jcready@gmail.com>",
-    "Jesús Leganés Combarro <piranna@gmail.com>"
+    "Jesús Leganés Combarro <piranna@gmail.com>",
+    "Steven Na <theyoung2002@naver.com>"
   ],
   "license": "MIT",
-  "repository": "pillarjs/send",
+  "repository": "https://github.com/theyoung/send",
   "keywords": [
     "static",
     "file",

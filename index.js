@@ -56,6 +56,15 @@ var BYTES_RANGE_REGEXP = /^ *bytes=/
 var MAX_MAXAGE = 60 * 60 * 24 * 365 * 1000 // 1 year
 
 /**
+ * Maximum value allowed for the max stale.
+ * @private
+ */
+
+var MAX_STALE = 0
+var MAX_S_AGE = 0
+var MAX_STALE_IF_ERROR = 0
+
+/**
  * Regular expression to match a path with a directory up component.
  * @private
  */
@@ -139,6 +148,10 @@ function SendStream (req, path, options) {
 
   this._immutable = opts.immutable !== undefined
     ? Boolean(opts.immutable)
+    : false
+
+  this._nostore = opts.nostore !== undefined
+    ? Boolean(opts.nostore)
     : false
 
   this._index = opts.index !== undefined
@@ -255,6 +268,219 @@ SendStream.prototype.maxage = deprecate.function(function maxage (maxAge) {
   debug('max-age %d', this._maxage)
   return this
 }, 'send.maxage: pass maxAge as option')
+
+/**
+ * Set max-stale to `max-stale`.
+ *
+ * @param {Number} maxStale
+ * @return {SendStream}
+ * @api public
+ */
+
+SendStream.prototype.maxstale = deprecate.function(function maxstale (maxStale) {
+  this._maxstale = typeof maxStale === 'string'
+    ? ms(maxStale)
+    : Number(maxStale)
+  this._maxstale = !isNaN(this._maxstale)
+    ? Math.min(Math.max(0, this._maxstale), MAX_STALE)
+    : 0
+  debug('max-stale %d', this._maxstale)
+  return this
+}, 'send.maxStale: pass maxStale as option')
+
+/**
+ * Set s-maxage to `sMaxage`.
+ *
+ * @param {Number} sMaxage
+ * @return {SendStream}
+ * @api public
+ */
+SendStream.prototype.smaxage = deprecate.function(function smaxage (sMaxage) {
+  this._smaxage = typeof sMaxage === 'string'
+    ? ms(sMaxage)
+    : Number(sMaxage)
+  this._smaxage = !isNaN(this._smaxage)
+    ? Math.min(Math.max(0, this._smaxage), MAX_S_AGE)
+    : 0
+  debug('smaxage %d', this._smaxage)
+  return this
+}, 'send.smaxage: pass sMaxage as option')
+
+/**
+ * Set no-cache to `nocache`.
+ *
+ * @param {boolean} nocache
+ * @return {SendStream}
+ * @api public
+ */
+
+SendStream.prototype.nocache = deprecate.function(function nocache (nocache = false) {
+  this._nocache = typeof nocache === 'boolean'
+    ? nocache
+    : false
+  debug('no-cache %d', this._nocache)
+  return this
+}, 'send.nocache: pass nocache as option')
+
+/**
+ * Set must-revalidate to `mustRevalidate`.
+ *
+ * @param {boolean} mustRevalidate
+ * @return {SendStream}
+ * @api public
+ */
+// Typically, must-revalidate is used with max-age.
+SendStream.prototype.mustrevalidate = deprecate.function(function mustrevalidate (mustRevalidate = false) {
+  this._mustrevalidate = typeof mustrevalidate === 'boolean'
+    ? mustrevalidate
+    : false
+  debug('must-revalidate %d', this._mustrevalidate)
+  return this
+}, 'send.mustrevalidate: pass mustrevalidate as option')
+
+/**
+ * Set proxy-revalidate to `proxyRevalidate`.
+ *
+ * @param {boolean} proxyRevalidate
+ * @return {SendStream}
+ * @api public
+ */
+SendStream.prototype.proxyrevalidate = deprecate.function(function proxyrevalidate (proxyRevalidate = false) {
+  this._proxyrevalidate = typeof proxyrevalidate === 'boolean'
+    ? proxyrevalidate
+    : false
+  debug('must-proxyrevalidate %d', this._proxyrevalidate)
+  return this
+}, 'send.proxyrevalidate: pass proxyrevalidate as option')
+
+/**
+ * Set no-store to `nostore`.
+ *
+ * @param {boolean} nostore
+ * @return {SendStream}
+ * @api public
+ */
+this._nostore = false
+SendStream.prototype.nostore = deprecate.function(function nocache (nostore = false) {
+  this._nostore = typeof nostore === 'boolean'
+    ? nostore
+    : false
+  debug('no-store %d', this._nostore)
+  return this
+}, 'send.nostore: pass nostore as option')
+
+/**
+ * Set private to `private`.
+ *
+ * @param {boolean} nostore
+ * @return {SendStream}
+ * @api public
+ */
+SendStream.prototype.privateFn = deprecate.function(function privateFn (privateCheck = false) {
+  this._private = typeof privateCheck === 'boolean'
+    ? privateCheck
+    : true
+  debug('private %d', this._private)
+  return this
+}, 'send.private: pass private as option')
+
+/**
+ * Set public to `public`.
+ *
+ * @param {boolean} nostore
+ * @return {SendStream}
+ * @api public
+ */
+this._public = true
+SendStream.prototype.publicFn = deprecate.function(function publicFn (publicCheck = true) {
+  this._public = typeof publicCheck === 'boolean'
+    ? publicCheck
+    : true
+  debug('public %d', this._public)
+  return this
+}, 'send.public: pass public as option')
+
+/**
+ * Set must-understand to `mustUnderstand`.
+ *
+ * @param {boolean} nostore
+ * @return {SendStream}
+ * @api public
+ */
+// must-understand should be coupled with no-store for fallback behavior.
+SendStream.prototype.mustunderstand = deprecate.function(function mustunderstand (mustUnderstand = false) {
+  this._mustunderstand = typeof mustUnderstand === 'boolean'
+    ? mustUnderstand
+    : false
+  debug('mustunderstand %d', this._mustunderstand)
+  return this
+}, 'send.mustunderstand: pass mustunderstand as option')
+
+/**
+ * Set no-transform to `notransform`.
+ *
+ * @param {boolean} notransform
+ * @return {SendStream}
+ * @api public
+ */
+
+SendStream.prototype.notransform = deprecate.function(function notransform (notransform = false) {
+  this._notransform = typeof notransform === 'boolean'
+    ? notransform
+    : false
+  debug('no-transform %d', this._notransform)
+  return this
+}, 'send.transform: pass transform as option')
+
+/**
+ * Set immutable to `immutable`.
+ *
+ * @param {boolean} immutable
+ * @return {SendStream}
+ * @api public
+ */
+// When you use a cache-busting pattern for resources and apply them to a long max-age, you can also add immutable to avoid revalidation.
+SendStream.prototype.immutable = deprecate.function(function immutable (immutable = false) {
+  this._immutable = typeof immutable === 'boolean'
+    ? immutable
+    : false
+  debug('no-immutable %d', this._immutable)
+  return this
+}, 'send.immutable: pass immutable as option')
+
+/**
+ * Set stale-while-revalidate to `staleWhileRevalidate`.
+ *
+ * @param {boolean} staleWhileRevalidate
+ * @return {SendStream}
+ * @api public
+ */
+// When you use a cache-busting pattern for resources and apply them to a long max-age, you can also add immutable to avoid revalidation.
+SendStream.prototype.stalewhilerevalidate = deprecate.function(function immutable (staleWhileRevalidate = false) {
+  this._stalewhilerevalidate = typeof staleWhileRevalidate === 'boolean'
+    ? staleWhileRevalidate
+    : false
+  debug('stale-while-revalidate %d', this._stalewhilerevalidate)
+  return this
+}, 'send.staleWhileRevalidate: pass staleWhileRevalidate as option')
+
+/**
+ * Set stale-if-error to `staleIfError`.
+ *
+ * @param {Number} sMaxage
+ * @return {SendStream}
+ * @api public
+ */
+SendStream.prototype.staleiferror = deprecate.function(function staleiferror (staleIfError) {
+  this._staleiferror = typeof staleIfError === 'string'
+    ? ms(staleIfError)
+    : Number(staleIfError)
+  this._staleiferror = !isNaN(this._staleiferror)
+    ? Math.min(Math.max(0, this._staleiferror), MAX_STALE_IF_ERROR)
+    : 0
+  debug('smaxage %d', this._staleiferror)
+  return this
+}, 'send.smaxage: pass sMaxage as option')
 
 /**
  * Emit error with `status`.
@@ -864,6 +1090,10 @@ SendStream.prototype.setHeader = function setHeader (path, stat) {
 
     if (this._immutable) {
       cacheControl += ', immutable'
+    }
+
+    if (this._nostore) {
+      cacheControl += ', no-store'
     }
 
     debug('cache-control %s', cacheControl)

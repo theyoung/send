@@ -1,3 +1,19 @@
+# This is not a original repository of send.
+I need to add Cache-Control features to control cache with commands such as 'no-store'.
+So, the source are modified by my willing.
+Please, remind it before applying the version.
+
+```bash
+$ npm install send-alter
+```
+
+##### no-store
+
+Enable or disable the `no-store` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the response will be 'public, max-age=0, no-store'
+
+# Below contents are original.
+
 # send
 
 [![NPM Version][npm-version-image]][npm-url]
